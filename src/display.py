@@ -23,8 +23,8 @@ class CoreGamePlay(arcade.View):
         self.window_height = windows.height //2
         self.background_color = arcade.color.RED_DEVIL
         self.planets = arcade.SpriteList()
-        self.planets.append(coregameplay.Sun(self.window_width, self.window_height))
-        self.planets.append(coregameplay.Mercury(self.window_width * 1.2, self.window_height))
+        self.planets.append(coregameplay.Sun(self.window_width, self.window_height, 1, 5))
+        self.planets.append(coregameplay.Mercury(self.window_width * 1.2, self.window_height, -2, 3))
         
 
     def on_draw(self):
@@ -33,5 +33,5 @@ class CoreGamePlay(arcade.View):
         
     
     def on_update(self, delta_time):
-        self.planets.update(delta_time * 60)
+        self.planets.update()
         
