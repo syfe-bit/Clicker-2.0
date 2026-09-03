@@ -29,28 +29,28 @@ class Mercury(Planet):
 
 class Venus(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/venus.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
 
 class Earth(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/earth.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
 
 class Mars(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/mars.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
 
 class Jupiter(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/jupiter.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
 
 class Saturn(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/saturn.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
 
 class Uranus(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/uranus.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
 
 class Neptune(Planet):
     def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+        super().__init__("sprites/planet/neptune.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
