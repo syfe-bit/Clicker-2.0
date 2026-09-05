@@ -1,10 +1,13 @@
 import arcade
+from PIL import ImageDraw, Image
 
 class Planet(arcade.Sprite):
-    def __init__(self, image_sprite, scale=1.0, x=0, y=0, orbit_speed=1, rotation_angle=1):
-        super().__init__(image_sprite, scale)
+    def __init__(self, x, y, orbit_speed, rotation_angle, money):
+        image_sprite = f"sprites/planet/{self.__class__.__name__.lower()}.png"
+        super().__init__(image_sprite, scale=1)
         self.center_x = x
         self.center_y = y
+        self.money = money
         self.orbit_speed = orbit_speed
         self.rotation_angle = rotation_angle
         windows = arcade.get_window()
@@ -20,37 +23,87 @@ class Planet(arcade.Sprite):
 
 
 class Sun(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle):
-        super().__init__("sprites/planet/sun.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    def __init__(self, x, y, orbit_speed, rotation_angle, money, steps=60):
+        super().__init__(x, y, orbit_speed, rotation_angle, money)
+        image_path = f"sprites/planet/{self.__class__.__name__.lower()}.png"
+        self.progress = 0
+        self.steps = steps
+        self.frames = self._generate_frames(image_path, steps)
+        self.texture = self.frames[0]  # commence invisible (0% rempli)
+        self.automation = False
+
+    def _generate_frames(self, image_path, steps):
+        base = Image.open(image_path).convert("RGBA")
+        w, h = base.size
+        cx, cy = w / 2, h / 2
+        r = (w**2 + h**2) ** 0.5
+
+        frames = []
+        for i in range(steps + 1):
+            angle = 360 * i / steps
+
+            mask = Image.new("L", (w, h), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.pieslice(
+                [cx - r, cy - r, cx + r, cy + r],
+                start=-90, end=angle - 90,
+                fill=255
+            )
+
+            frame = base.copy()
+            _, _, _, alpha = frame.split()
+            new_alpha = Image.composite(alpha, Image.new("L", (w, h), 0), mask)
+            frame.putalpha(new_alpha)
+
+            frames.append(arcade.Texture(image=frame))
+
+        return frames
+
+    def Click_to_update(self):
+        if self.progress < 100:
+            self.progress += 30 
+
+        if self.progress >= 100:
+            self.money.add_money()
+            self.progress -= 100
+                            
+        index = int((self.progress / 100) * self.steps)
+        self.texture = self.frames[index]
+
+    def update(self, delta_time):
+        self.angle += self.rotation_angle  # tourne sur lui-même, pas d'orbite
+
+        if self.automation:
+            if self.progress < 100:
+                self.progress += 30 
+                if self.progress > 100:
+                    self.progress -= 100
+            else:
+                self.progress -= 100
+
+            index = int((self.progress / 100) * self.steps)
+            self.texture = self.frames[index]
         
 class Mercury(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/mercury.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Venus(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/venus.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Earth(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/earth.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Mars(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/mars.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Jupiter(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/jupiter.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Saturn(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/saturn.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Uranus(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/uranus.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
 
 class Neptune(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle ):
-        super().__init__("sprites/planet/neptune.png", scale=1, x=x, y=y, orbit_speed=orbit_speed, rotation_angle=rotation_angle)
+    pass
