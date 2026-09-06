@@ -1,29 +1,13 @@
 import arcade
 import arcade.gui
+import arcade.types
 
-import src.gameplay.coregameplay as coregameplay
-import src.gameplay.calculateMoney as calculateMoney
-
-TEX_RED_BUTTON_NORMAL = arcade.load_texture(":resources:gui_basic_assets/button/red_normal.png")
-TEX_RED_BUTTON_HOVER = arcade.load_texture(":resources:gui_basic_assets/button/red_hover.png")
-TEX_RED_BUTTON_PRESS = arcade.load_texture(":resources:gui_basic_assets/button/red_press.png")
-
-class HomeMenu(arcade.View):
-    def __init__(self):
-        super().__init__()
-        self.background_color = arcade.color.AMAZON
-
-    def on_draw(self):
-        self.clear()
-        arcade.Text("Clique pour jouer", 400, 300, arcade.color.WHITE, 20).draw()
-
-    def on_mouse_press(self, x, y, button, modifiers):
-        game_view = CoreGamePlay()
-        self.window.show_view(game_view)
+import src.game.coregameplay as coregameplay
+import src.game.calculateMoney as calculateMoney
 
 ## -----------------------------------------------------------------------------------
 
-class CoreGamePlay(arcade.View):
+class GameView(arcade.View):
     def __init__(self):
         super().__init__()
         windows = arcade.get_window()
@@ -42,8 +26,9 @@ class CoreGamePlay(arcade.View):
                     horizontal_spacing=10,
         )
 
-        btn = arcade.gui.UIFlatButton(text=f"Bouton test", width=120)
-        grid.add(btn, col_num=2, row_num=1)
+        self.btn = arcade.gui.UITextureButton(texture=arcade.load_texture("sprites/button/button_market_sun.png"), text="test", scale=3)
+        grid.add(self.btn, col_num=2, row_num=0)
+
         anchor = arcade.gui.UIAnchorLayout()
         anchor.add(child=grid,
                    anchor_x="left",
@@ -51,8 +36,10 @@ class CoreGamePlay(arcade.View):
                    align_x=20)
         self.ui.add(anchor)
 
+        ## -----------------------------------------------
+        ## ------------- cash display system -------------
+
         self.money = calculateMoney.Money()
-        self.planets = arcade.SpriteList()
         self.display_money = arcade.Text(
             "money : 0",
             x=10,
@@ -64,6 +51,7 @@ class CoreGamePlay(arcade.View):
         ## -----------------------------------------------
         ## ---------------- system planet ----------------
 
+        self.planets = arcade.SpriteList()
         self.sun = coregameplay.Sun(self.window_width, self.window_height, 1, 5, self.money)
         self.planets.append(self.sun)
         ##self.planets.append(coregameplay.Mercury(self.window_width * 1.1, self.window_height, -2, 3))
@@ -94,4 +82,8 @@ class CoreGamePlay(arcade.View):
         
     def on_update(self, delta_time):
         self.planets.update()
+        if self.money.get_money() > 20:
+            self.btn.disabled = False
+        else:
+            self.btn.disabled = True
         
