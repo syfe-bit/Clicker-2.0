@@ -2,8 +2,14 @@ import arcade
 import arcade.gui
 import arcade.types
 
+from src.ui.buttons import ShopButton
+
 import src.game.coregameplay as coregameplay
 import src.game.calculateMoney as calculateMoney
+
+## -----------------------------------------------------------------------------------
+
+
 
 ## -----------------------------------------------------------------------------------
 
@@ -19,18 +25,18 @@ class GameView(arcade.View):
         ## ---------------- system button ----------------
 
         self.ui = arcade.gui.UIManager()
-        grid = arcade.gui.UIGridLayout(
-                    column_count=9,
-                    row_count=1,
-                    vertical_spacing=10,
-                    horizontal_spacing=10,
-        )
+        box = arcade.gui.UIBoxLayout(space_between=10)
 
-        self.btn = arcade.gui.UITextureButton(texture=arcade.load_texture("sprites/button/button_market_sun.png"), text="test", scale=3)
-        grid.add(self.btn, col_num=2, row_num=0)
+        self.shop_buttons = []
+        for i in range(9):
+            btn = ShopButton(initial_price=100, unlock_amount=10*i, callback=None)
+            btn.callback = lambda e, b=btn: self.buy_upgrade(b)
+            btn.on_click = btn.callback
+            self.shop_buttons.append(btn)
+            box.add(btn)
 
         anchor = arcade.gui.UIAnchorLayout()
-        anchor.add(child=grid,
+        anchor.add(child=box,
                    anchor_x="left",
                    anchor_y="center",
                    align_x=20)
@@ -76,14 +82,18 @@ class GameView(arcade.View):
     def on_draw(self):
         self.clear()
         self.ui.draw()
-        self.display_money.text = f"money: {self.money.get_money()}"
+        self.display_money.text = f"money: {self.money.get_money():.2f}"
         self.display_money.draw()
         self.planets.draw()
         
     def on_update(self, delta_time):
         self.planets.update()
-        if self.money.get_money() > 20:
-            self.btn.disabled = False
-        else:
-            self.btn.disabled = True
+        for btn in self.shop_buttons:
+            btn.update_visibility(self.money.get_money())
+
+    def buy_upgrade(self, btn):
+        if self.money.get_money() >= btn.price:
+            if self.money.withdraw_money(btn.price):
+                btn.update_price((btn.price * 1.15))
+                print(f"Achat réussi ! Prix suivant : {btn.price}$")
         
