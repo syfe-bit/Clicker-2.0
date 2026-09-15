@@ -1,30 +1,11 @@
 import arcade
 from PIL import ImageDraw, Image
 
-class Planet(arcade.Sprite):
-    def __init__(self, x, y, orbit_speed, rotation_angle, money):
-        image_sprite = f"sprites/planet/{self.__class__.__name__.lower()}.png"
-        super().__init__(image_sprite, scale=1)
-        self.center_x = x
-        self.center_y = y
-        self.money = money
-        self.orbit_speed = orbit_speed
-        self.rotation_angle = rotation_angle
-        windows = arcade.get_window()
-        self.window_width = windows.width //2
-        self.window_height = windows.height //2
-        
+import src.game.coregameplay.coregameplay as coregameplay
 
-    def update(self, delta_time):
-        x_position, y_position = arcade.math.rotate_point(self.center_x, self.center_y, self.window_width, self.window_height, self.orbit_speed)
-        self.center_x = x_position
-        self.center_y = y_position
-        self.angle += self.rotation_angle 
-
-
-class Sun(Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle, money, steps=60):
-        super().__init__(x, y, orbit_speed, rotation_angle, money)
+class Sun(coregameplay.Planet):
+    def __init__(self, x, y, orbit_speed, rotation_angle, money, money_value, steps=60):
+        super().__init__(x, y, orbit_speed, rotation_angle, money, money_value)
         image_path = f"sprites/planet/{self.__class__.__name__.lower()}.png"
         self.progress = 0
         self.steps = steps
@@ -64,7 +45,7 @@ class Sun(Planet):
             self.progress += 30 
 
         if self.progress >= 100:
-            self.money.add_money()
+            self.money.add_money(self.money_value, self.money_effect)
             self.progress -= 100
                             
         index = int((self.progress / 100) * self.steps)
@@ -83,27 +64,3 @@ class Sun(Planet):
 
             index = int((self.progress / 100) * self.steps)
             self.texture = self.frames[index]
-        
-class Mercury(Planet):
-    pass
-
-class Venus(Planet):
-    pass
-
-class Earth(Planet):
-    pass
-
-class Mars(Planet):
-    pass
-
-class Jupiter(Planet):
-    pass
-
-class Saturn(Planet):
-    pass
-
-class Uranus(Planet):
-    pass
-
-class Neptune(Planet):
-    pass
