@@ -4,14 +4,13 @@ from PIL import ImageDraw, Image
 import src.game.coregameplay.coregameplay as coregameplay
 
 class Sun(coregameplay.Planet):
-    def __init__(self, x, y, orbit_speed, rotation_angle, money, money_value, steps=60):
-        super().__init__(x, y, orbit_speed, rotation_angle, money, money_value)
+    def __init__(self, x: float, y: float, orbit_speed: float, rotation_angle: float, money, money_value: float, nb_of_times_purchased_upgrade, steps=60):
+        super().__init__(x, y, orbit_speed, rotation_angle, money, money_value, nb_of_times_purchased_upgrade)
         image_path = f"sprites/planet/{self.__class__.__name__.lower()}.png"
         self.progress = 0
         self.steps = steps
         self.frames = self._generate_frames(image_path, steps)
         self.texture = self.frames[0]  # commence invisible (0% rempli)
-        self.automation = False
 
     def _generate_frames(self, image_path, steps):
         base = Image.open(image_path).convert("RGBA")
@@ -56,10 +55,10 @@ class Sun(coregameplay.Planet):
 
         if self.automation:
             if self.progress < 100:
-                self.progress += 30 
-                if self.progress > 100:
-                    self.progress -= 100
-            else:
+                        self.progress += 30 
+            
+            if self.progress >= 100:
+                self.money.add_money(self.money_value, self.money_effect)
                 self.progress -= 100
 
             index = int((self.progress / 100) * self.steps)

@@ -12,7 +12,8 @@ class ShopButton(arcade.gui.UIFlatButton):
             text=f"Améliorer - {self.price}$",
             width=200, 
             height=60,
-            **kwargs)
+            **kwargs
+        )
 
         if callback:
             self.on_click = callback
