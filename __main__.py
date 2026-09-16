@@ -7,7 +7,7 @@ WINDOW_HEIGHT = 720
 WINDOW_TITLE = "CLICKER PIXEL"
 
 def main():
-    Window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+    Window = arcade.Window(width=WINDOW_WIDTH, height=WINDOW_HEIGHT, title=WINDOW_TITLE, center_window=True)
     Window.show_view(menu_view.MenuView())
     arcade.run()
 

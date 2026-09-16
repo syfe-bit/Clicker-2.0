@@ -6,6 +6,7 @@ from src.ui import (shopButtons, remainingButtons)
 from src.game.coregameplay import (sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune)
 from src.game.upgrade.upgrade import Upgrade
 import src.game.calculateMoney as calculateMoney
+import src.views.settings_view as settings_view
 
 ## -----------------------------------------------------------------------------------
 
@@ -18,6 +19,8 @@ class GameView(arcade.View):
         self.background_color = arcade.color.RED_DEVIL
 
         self.settings_open = False
+        self.settings_panel = settings_view.settings_view()
+        self.sol_open = False
 
         ## -----------------------------------------------
         ## ------------- cash display system -------------
@@ -100,16 +103,31 @@ class GameView(arcade.View):
         
         box_for_the_remaining_buttons = arcade.gui.UIBoxLayout(space_between=10)
 
-        remaining_buttons_configs = [
-                    ("Sol", None),
-                    ("settings", None)
-                ]
+        btn_game = remainingButtons.RemainingButton(button_name="Game", callback=None)
+        btn_game.callback = lambda e: (
+            setattr(self, 'settings_open', False),
+            setattr(self, 'sol_open', False)
+        )
+        
+        btn_game.on_click = btn_game.callback
+        box_for_the_remaining_buttons.add(btn_game)
+       
+        btn_settings = remainingButtons.RemainingButton(button_name="Settings", callback=None)
+        btn_settings.callback = lambda e: (
+            setattr(self, 'settings_open', True),
+            setattr(self, 'sol_open', False)
+        )
 
-        self.remaining_buttons = []
-        for button_name, callback in remaining_buttons_configs:
-            btn = remainingButtons.RemainingButton(button_name=button_name, callback=callback)
-            self.remaining_buttons.append(btn)
-            box_for_the_remaining_buttons.add(btn)
+        btn_settings.on_click = btn_settings.callback
+        box_for_the_remaining_buttons.add(btn_settings)
+
+        btn_sol = remainingButtons.RemainingButton(button_name="Sol", callback=None)
+        btn_sol.callback = lambda e: (
+            setattr(self, 'settings_open', False),
+            setattr(self, 'sol_open', True)
+        )
+        btn_sol.on_click = btn_sol.callback
+        box_for_the_remaining_buttons.add(btn_sol)
 
         anchor_for_the_layout_of_the_remaining_buttons = arcade.gui.UIAnchorLayout()
         anchor_for_the_layout_of_the_remaining_buttons.add(
@@ -126,9 +144,11 @@ class GameView(arcade.View):
 
     def on_show_view(self):
         self.ui_manager.enable()
+        self.settings_panel.on_show_view()
 
     def on_hide_view(self):
         self.ui_manager.disable()
+        self.settings_panel.on_hide_view()
 
     def on_draw(self):
         self.clear()
@@ -136,6 +156,16 @@ class GameView(arcade.View):
         self.display_money.text = f"money: {self.money.get_money():.2f}"
         self.display_money.draw()
         self.planets.draw()
+
+        if self.settings_open:
+            self.settings_panel.on_draw()
+
+        if self.sol_open:
+            arcade.draw_rect_filled(
+                arcade.XYWH(self.window_width, self.window_height, self.window.width, self.window.height),
+                color=(150, 0, 0, 150)
+            )
+
         
     def on_update(self, delta_time):
         self.planets.update()
@@ -151,4 +181,3 @@ class GameView(arcade.View):
             planet.apply_effect_money(money_multiplier_effect)
             planet.apply_automation()
             btn.update_price((btn.price * 1.15))
-        
