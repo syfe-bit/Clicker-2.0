@@ -1,12 +1,12 @@
 import arcade
-import arcade.gui
+import arcade.gui as ui
 
-from src.ui import (shopButtons, remainingButtons)
+from src.ui import (shopButtons)
 
 from src.game.coregameplay import (sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune)
 from src.game.upgrade.upgrade import Upgrade
+from src.views import (settings_view, sol_view)
 import src.game.calculateMoney as calculateMoney
-import src.views.settings_view as settings_view
 
 ## -----------------------------------------------------------------------------------
 
@@ -18,24 +18,100 @@ class GameView(arcade.View):
         self.window_height = windows.height //2
         self.background_color = arcade.color.RED_DEVIL
 
-        self.settings_open = False
-        self.settings_panel = settings_view.settings_view()
-        self.sol_open = False
+        ## -----------------------------------------------
+        ## --------- Widget manager configuration --------
+
+        self.ui_manager = ui.UIManager()
+        main_anchor = ui.UIAnchorLayout()
 
         ## -----------------------------------------------
-        ## ------------- cash display system -------------
+        ## ----- Anchor configuration for the banner -----
+
+        banner_anchor = ui.UIAnchorLayout(size_hint=(1, 0.1))
+        banner_anchor.with_background(color=arcade.color.PURPLE)
+        main_anchor.add(banner_anchor, anchor_x="left", anchor_y="top")
+
+        ## -----------------------------------------------
+        ## ---- Anchor configuration for the content -----
+
+        content_anchor = ui.UIAnchorLayout(size_hint=(0.7, 0.9))
+        main_anchor.add(content_anchor, anchor_x="left", anchor_y="bottom")
+
+        ## -----------------------------------------------
+        ## ----------- Game view configuration -----------
+
+        self.game_panel = ui.UIAnchorLayout(size_hint=(1, 1))
+        content_anchor.add(self.game_panel, anchor_x="left", anchor_y="top")
+
+        ## -----------------------------------------------
+        ## ----------- Sol view configuration ------------
+
+        self.sol_panel = ui.UIAnchorLayout(size_hint=(1, 1))
+        self.sol_panel.with_background(color=arcade.uicolor.DARK_BLUE_MIDNIGHT_BLUE)
+        content_anchor.add(self.sol_panel, anchor_x="left", anchor_y="top")
+        sol_view.Sol_view()
+
+        ## -----------------------------------------------
+        ## --------- Settings view configuration ---------
+
+        self.settings_panel = ui.UIAnchorLayout(size_hint=(1, 1))
+        self.settings_panel.with_background(color=arcade.uicolor.GRAY_CONCRETE)
+        content_anchor.add(self.settings_panel, anchor_x="left", anchor_y="top")
+        settings_view.Settings_view(anchor=self.settings_panel)
+
+        ## -----------------------------------------------
+        ## --------- Default view configuration ----------
+
+        self.game_panel.visible = True
+        self.sol_panel.visible = False
+        self.settings_panel.visible = False
+
+        ## ----------------------------------------------------------------
+        ## ---- Anchor and button configuration for in-game navigation ----
+        
+        box_for_navigation_buttons = ui.UIButtonRow(vertical=True, size_hint=(0.3, 0.9))
+        box_for_navigation_buttons.with_padding(all=10)
+        box_for_navigation_buttons.with_background(color=arcade.uicolor.WHITE_CLOUDS)
+                        
+        box_for_navigation_buttons.add_button("Game", style=ui.UIFlatButton.STYLE_BLUE, size_hint=(1, 0.1))
+        box_for_navigation_buttons.add_button("Sol", style=ui.UIFlatButton.STYLE_BLUE, size_hint=(1, 0.1))
+        box_for_navigation_buttons.add_button("Settings", style=ui.UIFlatButton.STYLE_BLUE, size_hint=(1, 0.1))
+                               
+        main_anchor.add(box_for_navigation_buttons, anchor_x="right", anchor_y="bottom")
+                        
+        @box_for_navigation_buttons.event("on_action")
+        def on_action(event: ui.UIOnActionEvent):
+            if event.action == "Game":
+                self.game_panel.visible = True
+                self.sol_panel.visible = False
+                self.settings_panel.visible = False
+            elif event.action == "Sol":
+                self.game_panel.visible = False
+                self.sol_panel.visible = True
+                self.settings_panel.visible = False
+            elif event.action == "Settings":
+                self.game_panel.visible = False
+                self.sol_panel.visible = False
+                self.settings_panel.visible = True
+
+        ## -----------------------------------------------
+        ## ---- Adding everything to the main anchor -----
+
+        self.ui_manager.add(main_anchor) ## addition at the very end of the achor containing everything
+
+        ## -----------------------------------------------
+        ## ------------- Cash display system -------------
         
         self.money = calculateMoney.Money()
-        self.display_money = arcade.Text(
-            "money : 0",
-            x=10,
-            y=10,
-            color=arcade.csscolor.WHITE,
-            font_size=18,
-            )
+        self.display_money = ui.UILabel(
+            text="Money : 0",
+            font_size=30
+        )
+
+        banner_anchor.add(self.display_money, anchor_x="center", anchor_y="center")
 
         ## -----------------------------------------------
-        ## ---------------- system planet ----------------
+        ## ---------------- System planet ----------------
 
         # (classe, décalage_x, orbit_speed, rotation_angle, money_value, initial_price)
         planet_configs = [
@@ -72,8 +148,7 @@ class GameView(arcade.View):
         ## -----------------------------------------------
         ## --------- Button system for the store ---------
         
-        self.ui_manager = arcade.gui.UIManager()
-        store_button_box = arcade.gui.UIBoxLayout(space_between=10)
+        store_button_box = ui.UIBoxLayout(space_between=10)
         
         self.shop_buttons = []
         for i, (planet, upgrade) in enumerate(self.planet_upgrades):
@@ -89,82 +164,32 @@ class GameView(arcade.View):
             self.shop_buttons.append(btn)
             store_button_box.add(btn)
         
-        anchor_for_the_store_button_box = arcade.gui.UIAnchorLayout()
+        anchor_for_the_store_button_box = ui.UIAnchorLayout()
         anchor_for_the_store_button_box.add(
             child=store_button_box,
             anchor_x="left",
             anchor_y="center",
             align_x=20,
         )
-        self.ui_manager.add(anchor_for_the_store_button_box)
-
-    ## -----------------------------------------------
-    ## --------- Button system for the rest ---------
         
-        box_for_the_remaining_buttons = arcade.gui.UIBoxLayout(space_between=10)
+        self.game_panel.add(anchor_for_the_store_button_box)
 
-        btn_game = remainingButtons.RemainingButton(button_name="Game", callback=None)
-        btn_game.callback = lambda e: (
-            setattr(self, 'settings_open', False),
-            setattr(self, 'sol_open', False)
-        )
-        
-        btn_game.on_click = btn_game.callback
-        box_for_the_remaining_buttons.add(btn_game)
-       
-        btn_settings = remainingButtons.RemainingButton(button_name="Settings", callback=None)
-        btn_settings.callback = lambda e: (
-            setattr(self, 'settings_open', True),
-            setattr(self, 'sol_open', False)
-        )
 
-        btn_settings.on_click = btn_settings.callback
-        box_for_the_remaining_buttons.add(btn_settings)
-
-        btn_sol = remainingButtons.RemainingButton(button_name="Sol", callback=None)
-        btn_sol.callback = lambda e: (
-            setattr(self, 'settings_open', False),
-            setattr(self, 'sol_open', True)
-        )
-        btn_sol.on_click = btn_sol.callback
-        box_for_the_remaining_buttons.add(btn_sol)
-
-        anchor_for_the_layout_of_the_remaining_buttons = arcade.gui.UIAnchorLayout()
-        anchor_for_the_layout_of_the_remaining_buttons.add(
-            child=box_for_the_remaining_buttons,
-            anchor_x="right",
-            anchor_y="center",
-            align_x=-20,
-        )
-        self.ui_manager.add(anchor_for_the_layout_of_the_remaining_buttons)
-        
     def on_mouse_press(self, x, y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.sun.Click_to_update()
 
     def on_show_view(self):
         self.ui_manager.enable()
-        self.settings_panel.on_show_view()
 
     def on_hide_view(self):
         self.ui_manager.disable()
-        self.settings_panel.on_hide_view()
 
     def on_draw(self):
         self.clear()
-        self.ui_manager.draw()
         self.display_money.text = f"money: {self.money.get_money():.2f}"
-        self.display_money.draw()
         self.planets.draw()
-
-        if self.settings_open:
-            self.settings_panel.on_draw()
-
-        if self.sol_open:
-            arcade.draw_rect_filled(
-                arcade.XYWH(self.window_width, self.window_height, self.window.width, self.window.height),
-                color=(150, 0, 0, 150)
-            )
+        self.ui_manager.draw()
 
         
     def on_update(self, delta_time):

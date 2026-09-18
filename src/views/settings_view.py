@@ -1,43 +1,58 @@
 import arcade
-import arcade.gui
+import arcade.gui as ui
 
-from src.ui import (dropdown, remainingButtons)
+class Settings_view():
+    def __init__(self, anchor):
 
-class settings_view():
-    def __init__(self):
-        self.windows = arcade.get_window()
-        self.window_width = self.windows.width //2
-        self.window_height = self.windows.height //2
+        ## -----------------------------------------------
+        ## -------------- manage the widget --------------
 
-        self.ui_manager = arcade.gui.UIManager()
+        settings_buttons_grid = ui.UIGridLayout(size_hint=(1, 1), space_between=10, column_count= 2, row_count=3)
+        settings_buttons_grid.with_padding(all=50)
+        anchor.add(settings_buttons_grid)
+        
+        ## -----------------------------------------------
+        ## -------------- resolution widget --------------
+        
+        dropdown_resolution_box = ui.UIBoxLayout(vertical=False, space_between=40)
+        settings_buttons_grid.add(dropdown_resolution_box, column= 0, row= 0)
+        dropdown_resolution_box.add(ui.UILabel(text="Screen resolution", font_size=20, size_hint=(1, 1)))
+        dropdown_resolution = ui.UIDropdown(
+                        default="default", 
+                        options=["1280x720", "1600x900", "1920x1080", "2560x1440", "3840x2160"]
+                    )
 
-        store_button_box = arcade.gui.UIBoxLayout(space_between=10)
+        @dropdown_resolution.event()
+        def on_change(event):
+            window = arcade.get_window()
+            resolution = event.new_value
+            list_of_resolution_sizes = resolution.split(sep="x")
+            window.set_size(int(list_of_resolution_sizes[0]), int(list_of_resolution_sizes[1]))
 
-        perso_dropdown = dropdown.Dropdown_resolution(default="default", options=["1280x720", "1600x900", "1920x1080", "2560x1440", "3840x2160"])
+        dropdown_resolution_box.add(dropdown_resolution)
 
-        store_button_box.add(perso_dropdown)
-          
-        anchor_for_the_store_button_box = arcade.gui.UIAnchorLayout()
-        anchor_for_the_store_button_box.add(
-            child=store_button_box,
-            anchor_x="left",
-            anchor_y="center",
-            align_x=20,
+        ## -----------------------------------------------
+        ## --------------- language widget ---------------
+
+        dropdown_sreen_mode_box = ui.UIBoxLayout(vertical=False, space_between=40)
+        settings_buttons_grid.add(dropdown_sreen_mode_box, column=0, row=1)
+        dropdown_sreen_mode_box.add(ui.UILabel(text="Screen mode", font_size=20))
+        dropdown_sreen_mode = ui.UIDropdown(
+            default="default",
+            options=["Window", "Full screen"]
         )
-        self.ui_manager.add(anchor_for_the_store_button_box)
 
-    def on_show_view(self):
-        self.ui_manager.enable()
-    
-    def on_hide_view(self):
-        self.ui_manager.disable()
+        @dropdown_sreen_mode.event()
+        def on_change(event):
+            window = arcade.get_window()
+            if event.new_value == "Full screen":
+                window.set_fullscreen(fullscreen=True)
+            else:
+                window.set_fullscreen(fullscreen=False)
 
-    def on_draw(self):
-        arcade.draw_rect_filled(
-            arcade.XYWH(self.window_width, self.window_height, self.windows.width, self.windows.height),
-            color=(0, 0, 0, 255)
-        )
-        self.ui_manager.draw()
+        dropdown_sreen_mode_box.add(dropdown_sreen_mode)
 
+        ## -----------------------------------------------
+        ## -------------- screen mode widget -------------
     
 
